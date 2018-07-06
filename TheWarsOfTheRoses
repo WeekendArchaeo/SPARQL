@@ -1,4 +1,3 @@
-# Some of the queries are based on the excellent Wikidata SPARQL tutorial at https://www.wikidata.org/wiki/Wikidata:SPARQL_tutorial
 # People born in Placentia Palace in 1491
 SELECT ?person ?personLabel ?dob WHERE {
   ?person wdt:P19 wd:Q1424839.
@@ -44,6 +43,8 @@ SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 
 
 # Graph of the great-great-grandchildren of John of Gaunt by his three wives
+# In this case we use the "/" for concatenate levels of descendants,
+# instead of the "[".
 #defaultView:Graph
 SELECT ?childMother ?childMotherLabel ?progeny ?progenyLabel
 WHERE
@@ -53,7 +54,7 @@ WHERE
 # ?child mother any John of Gaunt's wives
   ?child wdt:P25 ?childMother.
 # ?progeny (grandchildren)
-  ?child wdt:P40 [wdt:P40 [wdt:P40 ?progeny]].
+  ?child wdt:P40/wdt:P40/wdt:P40 ?progeny.
 SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 ORDER BY ?childMotherLabel
@@ -69,7 +70,7 @@ WHERE
 # ?child mother any John of Gaunt's wives
   ?child wdt:P25 ?childMother.
 # ?progeny (grandchildren)
-  ?child wdt:P40 [wdt:P40 [wdt:P40 ?progeny]].
+  ?child wdt:P40/wdt:P40/wdt:P40 ?progeny.
 OPTIONAL{
    ?progeny wdt:P19 ?pob.
    ?pob wdt:P625 ?coord.  }
@@ -87,8 +88,29 @@ WHERE
 # ?child mother any John of Gaunt's wives
   ?child wdt:P25 ?childMother.
 # ?progeny (grandchildren)
-  ?child wdt:P40 [wdt:P40 [wdt:P40 ?progeny]].
+  ?child wdt:P40/wdt:P40/wdt:P40 ?progeny.
 SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 GROUP BY ?childMother ?childMotherLabel
 ORDER BY DESC(?numprogeny)
+
+
+# Descendants of John de Gaunt sorted by descending date of birth
+SELECT ?descendant ?descendantLabel ?dob
+WHERE
+{
+  wd:Q193752 wdt:P40+ ?descendant.
+  ?descendant wdt:P569 ?dob
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY ASC(?dob)
+
+
+# Number of descendants of John de Gaunt sorted by descending date of birth
+SELECT (COUNT(?descendant) AS ?numDescendants)
+WHERE
+{
+  wd:Q193752 wdt:P40+ ?descendant.
+  ?descendant wdt:P569 ?dob
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
