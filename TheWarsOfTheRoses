@@ -1,0 +1,133 @@
+# Some of the queries are based on the excellent Wikidata SPARQL tutorial at https://www.wikidata.org/wiki/Wikidata:SPARQL_tutorial
+
+# People born in Placentia Palace in 1491
+SELECT ?person ?personLabel ?dob WHERE {
+  ?person wdt:P19 wd:Q1424839.
+  ?person wdt:P569 ?dob.
+  FILTER(YEAR(?dob) = 1491).
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+}
+
+
+# Children of Edward IV and Elizabeth Woodville, with their places of birth
+#defaultView:Map
+SELECT ?child ?childLabel ?pob ?pobLabel ?coord
+WHERE
+{
+# ?child  father   Edward IV
+  ?child  wdt:P22 wd:Q160341;
+# ?child  mother   Elizabeth Woodville
+         wdt:P25 wd:Q229214;
+# ?child place of birth  
+         wdt:P19 ?pob.
+  ?pob  wdt:P625 ?coord.
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+
+
+# Grandchildren of Edward IV and Elizabeth Woodville of each of their sons/daughter with their places of birth (if known)
+# The main difference with the previous query is that we use here the P40 property (someone is the parent of ?someone),
+# instead of P22/P25 (?someone has as father/mother someone)
+#defaultView:Map
+SELECT ?child ?childLabel ?grandChild ?grandChildLabel ?pob ?pobLabel ?coord
+WHERE
+{
+# ?child  father   Edward IV
+  wd:Q160341 wdt:P40 ?child.
+# ?child  mother   Elizabeth Woodville
+  wd:Q229214 wdt:P40 ?child.        
+# ?grandchild  
+   ?child wdt:P40 ?grandChild.
+# ?grandchild place of birth
+OPTIONAL{
+   ?grandChild wdt:P19 ?pob.
+   ?pob wdt:P625 ?coord.  }
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+
+
+# Great-great-grandchildren of Edward IV and Elizabeth Woodville of each of their sons/daughters with their places of birth (if known)
+#defaultView:Map
+SELECT ?child ?childLabel ?grandChild ?grandChildLabel ?pob ?pobLabel ?coord
+WHERE
+{
+# ?child  father   Edward IV
+  wd:Q160341 wdt:P40 ?child.
+# ?child  mother   Elizabeth Woodville
+  wd:Q229214 wdt:P40 ?child.  
+# ?grandchild  
+   ?child wdt:P40 ?grandChild1.
+# ?grandchild  
+   ?grandChild1 wdt:P40 ?grandChild2.    
+# ?grandchild  
+   ?grandChild2 wdt:P40 ?grandChild.
+# ?grandchild place of birth
+OPTIONAL{
+   ?grandChild wdt:P19 ?pob.
+   ?pob wdt:P625 ?coord.  }
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+
+
+# Number the great-great-grandchildren of John of Gaunt by his three wives
+SELECT ?childMother ?childMotherLabel (COUNT(?finaldescendants) AS ?numfinaldescendants)
+WHERE
+{
+# ?child father John of Gaunt
+  wd:Q193752 wdt:P40 ?child.
+# ?child mother any John of Gaunt's wives
+  ?child wdt:P25 ?childMother.
+# ?descendants1 (grandchildren)
+   ?child wdt:P40 ?descendants1.
+# ?descendants2 (great grandchildren)  
+   ?descendants1 wdt:P40 ?descendants2.    
+# ?finaldescendants (great great grandchildren)  
+   ?descendants2 wdt:P40 ?finaldescendants.
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+GROUP BY ?childMother ?childMotherLabel
+ORDER BY DESC(?numfinaldescendants)
+GROUP BY ?childMother ?childMotherLabel
+
+
+# Graph of the great-great-grandchildren of John of Gaunt by his three wives
+#defaultView:Graph
+SELECT ?childMother ?childMotherLabel ?finaldescendants ?finaldescendantsLabel
+WHERE
+{
+# ?child father John of Gaunt
+  wd:Q193752 wdt:P40 ?child.
+# ?child mother any John of Gaunt's wives
+  ?child wdt:P25 ?childMother.
+# ?descendants1 (grandchildren)
+   ?child wdt:P40 ?descendants1.
+# ?descendants2 (great grandchildren)  
+   ?descendants1 wdt:P40 ?descendants2.    
+# ?finaldescendants (great great grandchildren)  
+   ?descendants2 wdt:P40 ?finaldescendants.
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY ?childMotherLabel
+
+
+# Map of the places of birth (if known) of the great-great-grandchildren of John of Gaunt by his three wives
+#defaultView:Map
+SELECT ?childMother ?childMotherLabel ?finaldescendants ?finaldescendantsLabel ?pob ?pobLabel ?coord
+WHERE
+{
+# ?child father John of Gaunt
+  wd:Q193752 wdt:P40 ?child.
+# ?child mother any John of Gaunt's wives
+  ?child wdt:P25 ?childMother.
+# ?descendants1 (grandchildren)
+   ?child wdt:P40 ?descendants1.
+# ?descendants2 (great grandchildren)  
+   ?descendants1 wdt:P40 ?descendants2.    
+# ?finaldescendants (great great grandchildren)  
+   ?descendants2 wdt:P40 ?finaldescendants.
+OPTIONAL{
+   ?finaldescendants wdt:P19 ?pob.
+   ?pob wdt:P625 ?coord.  }
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY ?childMotherLabel
