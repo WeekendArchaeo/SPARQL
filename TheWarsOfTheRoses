@@ -114,3 +114,18 @@ WHERE
   ?descendant wdt:P569 ?dob
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
+
+
+#Map with the places of birth of all the descendants of John de Gaunt to present day
+#defaultView:Map
+SELECT ?descendant ?descendantLabel ?dob ?pob ?pobLabel ?coord
+WHERE
+{
+  wd:Q193752 wdt:P40+ ?descendant.
+  ?descendant wdt:P569 ?dob
+  OPTIONAL{
+   ?descendant wdt:P19 ?pob.
+   ?pob wdt:P625 ?coord.  }
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY ASC(?dob)
