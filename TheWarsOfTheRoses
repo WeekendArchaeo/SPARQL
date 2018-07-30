@@ -23,6 +23,22 @@ SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 
 
+# Timeline of the births of the children of Edward IV and Elizabeth Woodville
+#defaultView:Timeline
+SELECT ?child ?childLabel ?image ?date
+WHERE
+{
+# ?child  father   Edward IV
+  ?child  wdt:P22 wd:Q160341;
+# ?child  mother   Elizabeth Woodville
+         wdt:P25 wd:Q229214;
+# ?child date of birth  
+         wdt:P569 ?date.
+  OPTIONAL {?child wdt:P18 ?image .}
+SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+
+
 # Great-great-grandchildren of Edward IV and Elizabeth Woodville of each of their sons/daughters with their places of birth (if known)
 #defaultView:Map
 SELECT ?child ?childLabel ?grandChild ?grandChildLabel ?pob ?pobLabel ?coord
