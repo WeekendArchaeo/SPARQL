@@ -24,6 +24,7 @@ SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 
 
 # Timeline of the births of the children of Edward IV and Elizabeth Woodville
+# Based on this query: https://t.co/K2Cu5LvrQO
 #defaultView:Timeline
 SELECT ?child ?childLabel ?image ?date
 WHERE
@@ -34,7 +35,7 @@ WHERE
          wdt:P25 wd:Q229214;
 # ?child date of birth  
          wdt:P569 ?date.
-  OPTIONAL {?child wdt:P18 ?image .}
+OPTIONAL {?child wdt:P18 ?image .}
 SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 
